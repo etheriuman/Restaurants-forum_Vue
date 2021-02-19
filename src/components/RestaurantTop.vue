@@ -8,7 +8,7 @@
           <a href="#">
             <img
               class="card-img"
-              :src="restaurant.image | emptyImageFilter"
+              :src="restaurant.image | emptyImage"
             >
           </a>
         </div>

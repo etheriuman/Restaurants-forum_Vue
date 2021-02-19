@@ -2,7 +2,7 @@
   <div class="col-3">
     <a href="#">
       <img
-        :src="user.image | emptyImageFilter"
+        :src="user.image | emptyImage"
         width="140px"
         height="140px"
       >

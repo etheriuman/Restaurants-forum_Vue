@@ -5,7 +5,7 @@
     </div>
     <div class="card-body">
         <router-link :to="{name: 'restaurant', params: {id: restaurant.id}}" v-for="restaurant in favoritedRestaurants" :key="restaurant.id">
-          <img :src="restaurant.image | emptyImageFilter" width="60" height="60" class="avatar">
+          <img :src="restaurant.image | emptyImage" width="60" height="60" class="avatar">
         </router-link>
     </div>
   </div>
