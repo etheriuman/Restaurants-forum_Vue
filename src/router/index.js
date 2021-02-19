@@ -87,6 +87,11 @@ const routes = [
     component: () => import('../views/AdminRestaurant.vue')
   },
   {
+    path: '/admin/categories',
+    name: 'admin-categories',
+    component: () => import('../views/AdminCategories.vue')
+  },
+  {
     path: '*',
     name: 'not-found',
     component: () => import('../views/NotFound.vue')
