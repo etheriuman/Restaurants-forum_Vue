@@ -2,7 +2,7 @@
   <div class="col-3">
     <a href="#">
       <img
-        :src="user.image || 'https://images-na.ssl-images-amazon.com/images/I/71YP%2BjAuh1L.png'"
+        :src="user.image | emptyImageFilter"
         width="140px"
         height="140px"
       >
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import {emptyImageFilter} from '.././utils/mixins'
 export default {
   props: {
     initialUser: {
@@ -42,6 +43,7 @@ export default {
       user: this.initialUser
     }
   },
+  mixins: [emptyImageFilter],
   methods: {
     addFollow() {
       this.user = {

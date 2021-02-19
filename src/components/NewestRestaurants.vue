@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import {fromNowFilter} from './../utils/mixin'
+import {fromNowFilter} from './../utils/mixins'
 
 export default {
   props: {

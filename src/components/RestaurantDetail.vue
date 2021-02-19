@@ -9,7 +9,7 @@
     <div class="col-lg-4">
       <img
         class="img-responsive center-block"
-        :src="restaurant.image"
+        :src="restaurant.image | emptyImageFilter"
         style="width: 250px; margin-bottom: 25px"
       />
       <div class="contact-info-wrap">
@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import {emptyImageFilter} from '.././utils/mixins'
 export default {
   props: {
     initialRestaurant: {
@@ -82,6 +83,7 @@ export default {
       restaurant: this.initialRestaurant,
     }
   },
+  mixins: [emptyImageFilter],
   methods: {
     addFavorite(restaurantId) {
       this.restaurant = {

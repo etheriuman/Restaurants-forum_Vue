@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import {fromNowFilter} from './../utils/mixin'
+import {fromNowFilter} from './../utils/mixins'
 
 const dummyUser = {
   currentUser: {

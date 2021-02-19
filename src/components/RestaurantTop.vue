@@ -8,7 +8,7 @@
           <a href="#">
             <img
               class="card-img"
-              :src="restaurant.image || 'https://i.pinimg.com/originals/4e/24/f5/4e24f523182e09376bfe8424d556610a.png'"
+              :src="restaurant.image | emptyImageFilter"
             >
           </a>
         </div>
@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import {emptyImageFilter} from '.././utils/mixins'
 export default {
   props: {
     initialRestaurant: {
@@ -61,6 +62,7 @@ export default {
       restaurant: this.initialRestaurant
     }
   },
+  mixins: [emptyImageFilter],
   methods: {
     addFavorite() {
       this.restaurant = {
