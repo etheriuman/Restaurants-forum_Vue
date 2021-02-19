@@ -35,10 +35,10 @@
             class="btn btn-link"
           >Show</router-link>
 
-          <a
-            href="#"
+          <router-link
+            :to="{name: 'restaurant-edit', params: {id: restaurant.id}}"
             class="btn btn-link"
-          >Edit</a>
+          >Edit</router-link>
 
           <button
             type="button"

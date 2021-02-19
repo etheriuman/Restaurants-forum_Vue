@@ -141,6 +141,7 @@ const dummyData = {
 }
 
 export default {
+  name: 'AdminRestaurantEdit',
   data() {
     return {
       restaurant: {
@@ -153,6 +154,20 @@ export default {
         openingHours: ''
       },
       categories: []
+    }
+  },
+  props: {
+    initialRestaurant: {
+      type: Object,
+      default: () => ({
+        name: '',
+        categoryId: '',
+        tel: '',
+        address: '',
+        description: '',
+        image: '',
+        openingHours: '',
+      })
     }
   },
   methods: {
@@ -177,6 +192,10 @@ export default {
   },
   created() {
     this.fetchCategories()
+    this.restaurant = {
+      ...this.restaurant,
+      ...this.initialRestaurant
+    }
   }
 }
 </script>
