@@ -30,7 +30,7 @@
               type="button"
               class="btn btn-danger mr-2"
               v-if="restaurant.isFavorited"
-              @click.prevent.stop="deleteFavorite"
+              @click.prevent.stop="deleteFavorite(restaurant.id)"
             >
               移除最愛
             </button>
@@ -38,7 +38,7 @@
               type="button"
               class="btn btn-primary"
               v-else
-              @click.prevent.stop="addFavorite"
+              @click.prevent.stop="addFavorite(restaurant.id)"
             >
               加到最愛
             </button>
@@ -50,6 +50,9 @@
 
 <script>
 import {emptyImageFilter} from '.././utils/mixins'
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
+
 export default {
   props: {
     initialRestaurant: {
@@ -64,18 +67,44 @@ export default {
   },
   mixins: [emptyImageFilter],
   methods: {
-    addFavorite() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: true
+        async addFavorite(restaurantId) {
+      try {
+        const { data } = await usersAPI.addFavorite({restaurantId})
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: true
+        }
+      } catch(e) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法將餐廳加入最愛，請稍後再試'
+        })
+        console.log(e)
       }
     },
-    deleteFavorite() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: false
+    async deleteFavorite(restaurantId) {
+      try {
+        const { data } = await usersAPI.deleteFavorite({restaurantId})
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: false
+        }
+      } catch(e) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法將餐廳移除最愛，請稍後再試'
+        })
+        console.log(e)
       }
-    }
+    },
   }
 }
 </script>
