@@ -1,12 +1,12 @@
 <template>
   <div class="col-3">
-    <a href="#">
+    <router-link :to="{name: 'user', params: {id: user.id}}">
       <img
         :src="user.image | emptyImage"
         width="140px"
         height="140px"
       >
-    </a>
+    </router-link>
     <h2>{{user.name}}</h2>
     <span class="badge badge-secondary">追蹤人數：{{user.Followers.length}}</span>
     <p class="mt-3">
@@ -14,7 +14,7 @@
         type="button"
         class="btn btn-danger"
         v-if="user.isFollowed"
-        @click.prevent.stop="deleteFollow"
+        @click.prevent.stop="deleteFollow(user.id)"
       >
         取消追蹤
       </button>
@@ -22,7 +22,7 @@
         type="button"
         class="btn btn-primary"
         v-else
-        @click.prevent.stop="addFollow"
+        @click.prevent.stop="addFollow(user.id)"
       >
         追蹤
       </button>
@@ -32,6 +32,9 @@
 
 <script>
 import {emptyImageFilter} from '.././utils/mixins'
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
+
 export default {
   props: {
     initialUser: {
@@ -45,16 +48,40 @@ export default {
   },
   mixins: [emptyImageFilter],
   methods: {
-    addFollow() {
-      this.user = {
-        ...this.user,
-        isFollowed: true
+    async addFollow(userId) {
+      try {
+        const { data } = await usersAPI.addFollowing({ userId })
+        if (data.status !== 'success') {
+          throw new Error(data.status)
+        }
+        this.user = {
+          ...this.user,
+          isFollowed: true
+        }
+      } catch(e) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法追蹤該使用者，請稍後再試'
+        })
+        console.log(e)
       }
     },
-    deleteFollow() {
-      this.user = {
-        ...this.user,
-        isFollowed: false
+    async deleteFollow(userId) {
+      try {
+        const { data } = await usersAPI.deleteFollowing({ userId })
+        if (data.status !== 'success') {
+          throw new Error(data.status)
+        }
+        this.user = {
+          ...this.user,
+          isFollowed: false
+        }
+      } catch(e) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法追蹤該使用者，請稍後再試'
+        })
+        console.log(e)
       }
     }
   }
