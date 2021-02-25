@@ -1,5 +1,8 @@
 <template>
-  <form @submit.prevent.stop="handleSubmit">
+  <form 
+  @submit.prevent.stop="handleSubmit"
+  v-show="!isLoading"
+  >
     <div class="form-group">
       <label for="name">Name</label>
       <input
@@ -103,45 +106,18 @@
     <button
       type="submit"
       class="btn btn-primary"
+      :disabled="isProcessing"
     >
-      送出
+      {{ isProcessing? '處理中' : '送出' }}
     </button>
   </form>
 </template>
 
 <script>
-
-const dummyData = {
-  categories: [
-    {
-      id: 1,
-      name: '中式料理',
-      createdAt: '2019-06-22T09:00:43.000Z',
-      updatedAt: '2019-06-22T09:00:43.000Z'
-    },
-    {
-      id: 2,
-      name: '日本料理',
-      createdAt: '2019-06-22T09:00:43.000Z',
-      updatedAt: '2019-06-22T09:00:43.000Z'
-    },
-    {
-      id: 3,
-      name: '義大利料理',
-      createdAt: '2019-06-22T09:00:43.000Z',
-      updatedAt: '2019-06-22T09:00:43.000Z'
-    },
-    {
-      id: 4,
-      name: '墨西哥料理',
-      createdAt: '2019-06-22T09:00:43.000Z',
-      updatedAt: '2019-06-22T09:00:43.000Z'
-    }
-  ]
-}
+import adminAPI from './../apis/admin'
+import { Toast } from './../utils/helpers'
 
 export default {
-  name: 'AdminRestaurantEdit',
   data() {
     return {
       restaurant: {
@@ -153,7 +129,8 @@ export default {
         image: '',
         openingHours: ''
       },
-      categories: []
+      categories: [],
+      isLoading: true
     }
   },
   props: {
@@ -168,11 +145,30 @@ export default {
         image: '',
         openingHours: '',
       })
+    },
+    isProcessing: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
-    fetchCategories() {
-      this.categories = dummyData.categories
+    async fetchCategories() {
+      try {
+        const response = await adminAPI.categories.get()
+        console.log(response)
+        if (response.statusText !== 'OK') {
+          throw new Error(response.statusText)
+        }
+        this.categories = response.data.categories
+        this.isLoading = false
+      } catch(e) {
+        this.isLoading = false
+        Toast.fire({
+          icon: 'error',
+          title: '無法取得分類清單，請稍後再試'
+        })
+        console.log(e)
+      }
     },
     handleFileChange(e) {
       const { files } = e.target
@@ -185,6 +181,20 @@ export default {
       }
     },
     handleSubmit(e) {
+      if (!this.restaurant.name) {
+        Toast.fire({
+          icon: 'warning',
+          title: '請填寫餐廳名稱'
+        })
+        return
+      }
+      if (!this.restaurant.categoryId) {
+        Toast.fire({
+          icon: 'warning',
+          title: '請填寫餐廳類別'
+        })
+        return
+      }
       const form = e.target
       const formData = new FormData(form)
       this.$emit('after-submit', formData)
