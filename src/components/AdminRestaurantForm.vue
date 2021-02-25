@@ -118,6 +118,7 @@ import adminAPI from './../apis/admin'
 import { Toast } from './../utils/helpers'
 
 export default {
+  name: 'AdminRestaurantForm',
   data() {
     return {
       restaurant: {
@@ -198,6 +199,14 @@ export default {
       const form = e.target
       const formData = new FormData(form)
       this.$emit('after-submit', formData)
+    }
+  },
+  watch: {
+    initialRestaurant(newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue
+      }
     }
   },
   created() {
