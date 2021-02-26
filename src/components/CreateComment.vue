@@ -18,21 +18,26 @@
       <button
         type="submit"
         class="btn btn-primary mr-0"
+        :disabled="isProcessing"
       >
-        Submit
+        {{isProcessing? '處理中' : '送出'}}
       </button>
     </div>
   </form>
 </template>
 
 <script>
-import {v4 as uuidv4} from 'uuid'
+import { mapState } from 'vuex'
 
 export default {
-  prop: {
+  props: {
     restaurantId: {
       type: Number,
       required: true
+    },
+    isProcessing: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -40,16 +45,26 @@ export default {
       text: ''
     }
   },
+  computed: {
+    ...mapState(['currentUser'])
+  },
   methods: {
     handleSubmit() {
       // TODO: 向 API 發送 POST 請求
       // 伺服器新增 Comment 成功後...
       this.$emit('after-create-comment', {
-        commentId: uuidv4(), // 尚未串接 API 暫時使用隨機的 id
         restaurantId: this.restaurantId,
         text: this.text
       })
       this.text = '' // 將表單內的資料清空
+    }
+  },
+  watch: {
+    initialRestaurantId(data) {
+      this.restaurantId = {
+        ...this.restaurantId,
+        ...data
+      }
     }
   }
 }

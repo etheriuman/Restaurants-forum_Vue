@@ -12,5 +12,16 @@ export default {
   },
   getTopRestaurants() {
     return apiHelper.get('/restaurants/top', {headers: {Authorization: `Bearer ${getToken()}`}})
+  },
+  getRestaurant({ restaurantId }) {
+    return apiHelper.get(`/restaurants/${restaurantId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
+  },
+  comments: {
+    create({ payload }) {
+      return apiHelper.post('/comments', payload, {headers: {Authorization: `Bearer ${getToken()}`}})
+    },
+    delete({ commentId }) {
+      return apiHelper.delete(`/comments/${commentId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
+    }
   }
 }

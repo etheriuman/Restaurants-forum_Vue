@@ -4,7 +4,7 @@
       所有評論：
     </h2>
 
-    <div v-for="comment in restaurantComments" :key="comment.id">
+    <div v-for="comment of restaurantComments" :key="comment.id">
       <blockquote class="blockquote mb-0">
         <button
           type="button"
@@ -31,29 +31,22 @@
 
 <script>
 import {fromNowFilter} from './../utils/mixins'
-
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: '管理者',
-    email: 'root@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: true
-  },
-  isAuthenticated: true
-}
+import { mapState } from 'vuex'
 
 export default {
   props: {
-    restaurantComments: {
+    initialRestaurantComments: {
       type: Array,
       required: true
     }
   },
   data() {
     return {
-      currentUser: dummyUser.currentUser
+      restaurantComments: this.initialRestaurantComments
     }
+  },
+  computed: {
+    ...mapState(['currentUser'])
   },
   methods: {
     handleDeleteButtonClick(commentId) {
@@ -61,6 +54,11 @@ export default {
       // TODO: 請求 API 伺服器刪除 id 為 commentId 的評論
       // 觸發父層事件 - $emit( '事件名稱' , 傳遞的資料 )
       this.$emit('after-delete-comment', commentId)
+    }
+  },
+  watch: {
+    initialRestaurantComments(data) {
+      this.restaurantComments = data
     }
   },
   mixins: [fromNowFilter]

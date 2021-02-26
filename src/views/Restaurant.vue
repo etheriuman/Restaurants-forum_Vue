@@ -5,9 +5,9 @@
     <RestaurantDetail :initial-restaurant="restaurant" />
     <hr>
     <!-- 餐廳評論 RestaurantComments -->
-    <RestaurantComments :restaurant-comments="restaurantComments" @after-delete-comment="afterDeleteComment"/>
+    <RestaurantComments :initial-restaurant-comments="restaurantComments" @after-delete-comment="afterDeleteComment"/>
     <!-- 新增評論 CreateComment -->
-    <CreateComment :restaurant-id="restaurant.id" @after-create-comment="afterCreateComment" />
+    <CreateComment :restaurant-id="restaurant.id" :isProcessing="isProcessing" @after-create-comment="afterCreateComment" />
   </div>
 </template>
 
@@ -15,62 +15,9 @@
 import RestaurantDetail from '../components/RestaurantDetail.vue'
 import RestaurantComments from '../components/RestaurantComments.vue'
 import CreateComment from '../components/CreateComment.vue'
-
-const dummyData = {
-    "restaurant": {
-        "id": 1,
-        "name": "Judy Runte",
-        "tel": "(918) 827-1962",
-        "address": "98138 Elisa Road",
-        "opening_hours": "08:00",
-        "description": "dicta et cupiditate",
-        "image": "https://loremflickr.com/320/240/food,dessert,restaurant/?random=1",
-        "createdAt": "2019-06-22T09:00:43.000Z",
-        "updatedAt": "2019-06-22T09:00:43.000Z",
-        "CategoryId": 3,
-        "Category": {
-            "id": 3,
-            "name": "義大利料理",
-            "createdAt": "2019-06-22T09:00:43.000Z",
-            "updatedAt": "2019-06-22T09:00:43.000Z"
-        },
-        "FavoritedUsers": [],
-        "LikedUsers": [],
-        "Comments": [
-            {
-                "id": 3,
-                "text": "Quos asperiores in nostrum cupiditate excepturi aspernatur.",
-                "UserId": 2,
-                "RestaurantId": 1,
-                "createdAt": "2019-06-22T09:00:43.000Z",
-                "updatedAt": "2019-06-22T09:00:43.000Z",
-                "User": {
-                    "id": 2,
-                    "name": "user1",
-                    "email": "user1@example.com",
-                    "password": "$2a$10$0ISHJI48xu/VRNVmEeycFe8v5ChyT305f8KaJVIhumu7M/eKAikkm",
-                    "image": "https://i.imgur.com/XooCt5K.png",
-                    "isAdmin": false,
-                    "createdAt": "2019-06-22T09:00:43.000Z",
-                    "updatedAt": "2019-06-23T01:16:31.000Z"
-                }
-            }
-        ]
-    },
-    "isFavorited": false,
-    "isLiked": false
-}
-
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: '管理者',
-    email: 'root@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: true
-  },
-  isAuthenticated: true
-}
+import { mapState } from 'vuex'
+import restaurantsAPI from './../apis/restaurants'
+import { Toast } from './../utils/helpers'
 
 export default {
   name: 'Restaurant',
@@ -82,7 +29,7 @@ export default {
   data() {
     return {
       restaurant: {
-      id: undefined,
+      id: -1,
       name: '',
       categoryName: '',
       image: '',
@@ -93,50 +40,98 @@ export default {
       isFavorited: false,
       isLiked: false
     },
-    currentUser: dummyUser.currentUser,
-    restaurantComments: []
+    restaurantComments: [],
+    isProcessing: false
     }
   },
+  computed: {
+    ...mapState(['currentUser'])
+  },
   methods: {
-    fetchData(restaurantId) {
-      console.log('now fetching restaurant, id: ' + restaurantId)
-      const {restaurant, isLiked, isFavorited} = dummyData
-      const {id, name, Category: category, image, openingHours, tel, address, description} = restaurant
-
-      this.restaurant = {
-        id,
-        name,
-        categoryName: category? category.name : '未分類',
-        image,
-        openingHours,
-        tel,
-        address,
-        description,
-        isLiked,
-        isFavorited
-      }
-      this.restaurantComments = dummyData.restaurant.Comments
-    },
-    afterDeleteComment(commentId) {
-      this.restaurantComments = this.restaurantComments.filter(comment => comment.id !== commentId)
-    },
-    afterCreateComment(payload) {
-      const {commentId, restaurantId, text} = payload
-      this.restaurantComments.push({
-        id: commentId,
-        RestaurantId: restaurantId,
-        text,
-        createdAt: new Date(),
-        User: {
-          id: this.currentUser.id,
-          name: this.currentUser.name
+    async fetchRestaurant(restaurantId) {
+      try {
+        const response = await restaurantsAPI.getRestaurant({ restaurantId })
+        this.isProcessing = false
+        if (response.statusText !== 'OK') {
+          throw new Error(response.statusText)
         }
-      })
+        const {
+          id,
+          name,
+          Category,
+          image,
+          opening_hours: openingHours,
+          tel,
+          address,
+          description,
+          Comments: restaurantComments
+        } = response.data.restaurant
+        const { isLiked, isFavorited } = response.data
+        this.restaurant = {
+          ...this.restaurant,
+          id,
+          name,
+          categoryName: Category? Category.name : '未分類',
+          image,
+          openingHours,
+          tel,
+          address,
+          description,
+          isLiked,
+          isFavorited
+        }
+        this.restaurantComments = restaurantComments
+      } catch(e) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法取得餐廳資訊，請稍後再試'
+        })
+        console.log(e)
+      }
+    },
+    async afterDeleteComment(commentId) {
+      try {
+        const { data } = await restaurantsAPI.comments.delete({ commentId })
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        console.log('about to filter')
+        this.restaurantComments = this.restaurantComments.filter(comment => comment.id !== commentId)
+      } catch(e) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法刪除留言，請稍後再試'
+        })
+        console.log(e)
+      }
+    },
+    async afterCreateComment(payload) {
+      try {
+        this.isProcessing = true
+        const { data } = await restaurantsAPI.comments.create({ payload })
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        console.log('fetch again!')
+        this.fetchRestaurant(this.restaurant.id)
+      } catch(e) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法新增留言，請稍後再試'
+        })
+        this.isProcessing = false
+        console.log(e)
+      }
     }
   },
   created() {
     const {id: restaurantId} = this.$route.params
-    this.fetchData(restaurantId)
+    this.fetchRestaurant(restaurantId)
+  },
+  beforeRouteUpdata(from, to, next) {
+    const { id } = to.params
+    this.fetchRestaurant(id)
+    next()
   }
 }
 </script>
