@@ -9,6 +9,9 @@ export default {
   get({ userId }) {
     return apiHelper.get(`/users/${userId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
   },
+  update({ userId, formData }) {
+    return apiHelper.put(`/users/${userId}`, formData, {headers: {Authorization: `Bearer ${getToken()}`}})
+  },
   // 美食達人
   getTopUsers() {
     return apiHelper.get('/users/top', {headers: {Authorization: `Bearer ${getToken()}`}})
