@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import usersAPI from './../apis/users'
 
 Vue.use(Vuex)
 
@@ -28,6 +29,24 @@ export default new Vuex.Store({
   },
   // 向 API fetch data 專用的函式庫
   actions: {
+    async fetchCurrentUser({ commit }) {
+      try {
+        const { data } = await usersAPI.getCurrentUser()
+        if (data.status === 'error') {
+          throw new Error(data.message)
+        }
+        const { id, name, email, image, isAdmin } = data
+        commit('setCurrentUser', {
+          id,
+          name,
+          email,
+          image,
+          isAdmin
+        })
+      } catch(e) {
+        console.log(e)
+      }
+    }
   },
   // 存放模組，vuex 規模龐大時用來拆檔
   modules: {

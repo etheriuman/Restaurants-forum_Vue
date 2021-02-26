@@ -93,6 +93,10 @@ export default {
         }
           // signIn succeed
           localStorage.setItem('token', data.token)
+
+          // 修改 currentUser 資料
+          this.$store.commit('setCurrentUser', data.user)
+
           this.$router.push('/restaurants')
       } catch(e) {
         this.password = ''
