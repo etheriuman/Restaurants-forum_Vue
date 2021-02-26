@@ -33,5 +33,13 @@ export default {
     update({ restaurantId, formData }) {
       return apiHelper.put(`/admin/restaurants/${restaurantId}`, formData, {headers: {Authorization: `Bearer ${getToken()}`}})
     }
+  },
+  users: {
+    get() {
+      return apiHelper.get('/admin/users', {headers: {Authorization: `Bearer ${getToken()}`}})
+    },
+    update({ userId, payLoad }) {
+      return apiHelper.put(`/admin/users/${userId}`, payLoad, {headers: {Authorization: `Bearer ${getToken()}`}})
+    }
   }
 }
