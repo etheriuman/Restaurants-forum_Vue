@@ -3,9 +3,20 @@ import Swal from 'sweetalert2'
 
 const baseURL = 'https://forum-express-api.herokuapp.com/api'
 
-export const apiHelper = axios.create({
+const axiosInstance = axios.create({
   baseURL
 })
+
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
 export const Toast  = Swal.mixin({
   toast: true,
@@ -13,3 +24,5 @@ export const Toast  = Swal.mixin({
   showConfirmButton: false,
   timer: 3000
 })
+
+export const apiHelper = axiosInstance
