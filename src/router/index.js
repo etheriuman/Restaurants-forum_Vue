@@ -6,6 +6,20 @@ import store from './../store'
 
 Vue.use(VueRouter)
 
+
+// 驗證是否為管理者
+const authorizeIsAdmin = (to, from, next) => {
+  // 取出currentUser
+  const currentUser = store.state.currentUser
+  // 如果 currentUser存在 && 不是管理者
+  if (currentUser && !currentUser.isAdmin) {
+    // 轉址到404
+    next('/404')
+    return
+  }
+  next()
+}
+
 const routes = [
   {
     path: '/',
@@ -70,32 +84,38 @@ const routes = [
   {
     path: '/admin/restaurants',
     name: 'admin-restaurants',
-    component: () => import('../views/AdminRestaurants.vue')
+    component: () => import('../views/AdminRestaurants.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/restaurants/new',
     name: 'admin-restaurant-new',
-    component: () => import('../views/AdminRestaurantNew.vue')
+    component: () => import('../views/AdminRestaurantNew.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/restaurants/:id/edit',
     name: 'admin-restaurant-edit',
-    component: () => import('../views/AdminRestaurantEdit.vue')
+    component: () => import('../views/AdminRestaurantEdit.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/restaurants/:id',
     name: 'admin-restaurant',
-    component: () => import('../views/AdminRestaurant.vue')
+    component: () => import('../views/AdminRestaurant.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/categories',
     name: 'admin-categories',
-    component: () => import('../views/AdminCategories.vue')
+    component: () => import('../views/AdminCategories.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/users',
     name: 'admin-users',
-    component: () => import('../views/AdminUsers.vue')
+    component: () => import('../views/AdminUsers.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '*',
@@ -109,9 +129,38 @@ const router = new VueRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  store.dispatch('fetchCurrentUser')
-  next()
+// 在每次路由轉址時觸發驗證使用者登入狀態
+router.beforeEach(async (to, from, next) => {
+
+    // 從localstorage中拿出token
+    const tokenInLocalStorage = localStorage.getItem('token')
+    // 取得store currentUser的token
+    const tokenInStore = store.state.token
+    // 取得store currentUser的驗證狀態
+    let isAuthenticated = store.state.isAuthenticated
+
+    // 如果token存在(表示有登入過)、localstorage的token也跟當前currentUser的token一樣：
+    if (tokenInLocalStorage && tokenInLocalStorage !== tokenInStore) {
+      // 就驗證使用者的token是否已經過期
+      isAuthenticated = await store.dispatch('fetchCurrentUser')
+    }
+
+    // 設定不需驗證的路由
+    const pathsWithoutAuthentication = ['sign-in', 'sign-up']
+
+    // 如果未認證，目標路由也不是登入頁或註冊頁，那就轉址到登入頁(避免無窮迴圈)
+    if (!isAuthenticated && !pathsWithoutAuthentication.includes(to.name)) {
+      // 轉址到登入頁
+      next('/signin')
+      return
+    }
+    // 如果已認證，目標路由是登入頁或註冊頁：
+    if (isAuthenticated && pathsWithoutAuthentication.includes(to.name)) {
+      // 就轉址到首頁
+      next('/restaurants')
+      return
+    }
+    next()
 })
 
 export default router

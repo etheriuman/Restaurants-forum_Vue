@@ -5,7 +5,7 @@ import usersAPI from './../apis/users'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  // 存放資料，相當於data
+  // 存放預設資料，相當於data
   state: {
     currentUser: {
       id: undefined,
@@ -14,7 +14,8 @@ export default new Vuex.Store({
       image: '',
       isAdmin: false
     },
-    isAuthenticated: false
+    isAuthenticated: false,
+    token: ''
   },
   // 用來操作data的函式庫，把api接回的資料放入等等...
   mutations: {
@@ -24,7 +25,14 @@ export default new Vuex.Store({
         ...state.currentUser,
         ...currentUser
       }
+      state.token = localStorage.getItem('token')
       state.isAuthenticated = true
+    },
+    revokeAuthentication(state) {
+      state.currentUser = {}
+      state.isAuthenticated = false
+      localStorage.removeItem('token')
+      state.token = ''
     }
   },
   // 向 API fetch data 專用的函式庫
@@ -43,8 +51,13 @@ export default new Vuex.Store({
           image,
           isAdmin
         })
+        return true
       } catch(e) {
         console.log(e)
+        console.log('cant fetch user information')
+        // fetch出error表示使用者token有問題，那就呼叫revokeAuthentication
+        commit('revokeAuthentication')
+        return false
       }
     }
   },
