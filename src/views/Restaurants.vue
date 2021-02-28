@@ -6,6 +6,9 @@
       <!-- 餐廳類別標籤 RestaurantsNavPills -->
       <RestaurantsNavPills :categories="categories" />
       <div class="row">
+        <div class="w-100 d-flex pt-5 justify-content-center" v-if="!restaurants.length">
+          <h4>此類別目前沒有餐廳資料</h4>
+        </div>
         <!-- 餐廳卡片 RestaurantCard-->
         <RestaurantCard v-for="restaurant in restaurants" :key="restaurant.id" :initial-restaurant="restaurant" />
       </div>
