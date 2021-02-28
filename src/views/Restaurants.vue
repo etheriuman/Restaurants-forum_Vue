@@ -1,28 +1,26 @@
 <template>
   <div class="container py-5">
     <NavTabs />
-    <Spinner v-if="isLoading"/>
-    <template v-else>
-      <!-- 餐廳類別標籤 RestaurantsNavPills -->
-      <RestaurantsNavPills :categories="categories" />
-      <div class="row">
-        <div class="w-100 d-flex pt-5 justify-content-center" v-if="!restaurants.length">
-          <h4>此類別目前沒有餐廳資料</h4>
-        </div>
-        <!-- 餐廳卡片 RestaurantCard-->
-        <RestaurantCard v-for="restaurant in restaurants" :key="restaurant.id" :initial-restaurant="restaurant" />
+    <!-- 餐廳類別標籤 RestaurantsNavPills -->
+    <RestaurantsNavPills :categories="categories" />
+    <div class="row">
+      <div class="w-100 d-flex pt-5 justify-content-center" v-if="!restaurants.length && !isLoading">
+        <h4>此類別目前沒有餐廳資料</h4>
       </div>
+      <Spinner class="w-100" v-if="isLoading"/>
+      <!-- 餐廳卡片 RestaurantCard-->
+      <RestaurantCard v-else v-for="restaurant in restaurants" :key="restaurant.id" :initial-restaurant="restaurant" />
+    </div>
 
-      <!-- 分頁標籤 RestaurantPagination -->
-      <RestaurantsPagination
-          v-if="totalPage.length > 1"
-          :current-page="currentPage"
-          :total-page="totalPage"
-          :category-id="categoryId"
-          :previous-page="previousPage"
-          :next-page="nextPage"
-        />
-    </template>
+    <!-- 分頁標籤 RestaurantPagination -->
+    <RestaurantsPagination
+        v-if="totalPage.length > 1"
+        :current-page="currentPage"
+        :total-page="totalPage"
+        :category-id="categoryId"
+        :previous-page="previousPage"
+        :next-page="nextPage"
+      />
   </div>
 </template>
 
@@ -59,6 +57,7 @@ export default {
   methods: {
       async fetchRestaurants({queryPage, queryCategoryId}) {
           try {
+            this.isLoading = true
             const response = await restaurantsAPI.getRestaurants({
                 page: queryPage,
                 categoryId: queryCategoryId
