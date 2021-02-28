@@ -29,7 +29,7 @@
         </button>
         <button
           type="button"
-          class="btn btn-primary btn-border favorite mr-2"
+          class="btn btn-danger btn-border favorite mr-2"
           v-else
           @click.prevent.stop="addFavorite(restaurant.id)"
           :disabled="isProcessing"
@@ -83,7 +83,6 @@ export default {
       try {
         this.isProcessing = true
         const { data } = await usersAPI.addFavorite({restaurantId})
-        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.message)
         }
@@ -91,6 +90,7 @@ export default {
           ...this.restaurant,
           isFavorited: true
         }
+        this.isProcessing = false
       } catch(e) {
         Toast.fire({
           icon: 'error',
@@ -102,9 +102,8 @@ export default {
     },
     async deleteFavorite(restaurantId) {
       try {
-        this.isProcessing - true
+        this.isProcessing = true
         const { data } = await usersAPI.deleteFavorite({restaurantId})
-        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.message)
         }
@@ -112,6 +111,7 @@ export default {
           ...this.restaurant,
           isFavorited: false
         }
+        this.isProcessing = false
       } catch(e) {
         Toast.fire({
           icon: 'error',
@@ -125,14 +125,14 @@ export default {
       try {
         this.isProcessing = true
         const { data } = await usersAPI.addLike({restaurantId})
-        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.status)
         }
         this.restaurant = {
-        ...this.restaurant,
+          ...this.restaurant,
         isLiked: true
         }
+        this.isProcessing = false
       } catch(e) {
         Toast.fire({
           icon: 'error',
@@ -147,14 +147,14 @@ export default {
       try {
         this.isProcessing = true
         const { data } = await usersAPI.deleteLike({restaurantId})
-        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.status)
         }
         this.restaurant = {
-        ...this.restaurant,
+          ...this.restaurant,
         isLiked: false
         }
+        this.isProcessing = false
       } catch(e) {
         Toast.fire({
           icon: 'error',
