@@ -1,3 +1,3 @@
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? 'restaurants-forum-vue' : '/'
+  publicPath: process.env.NODE_ENV === 'production' ? '/restaurants-forum-vue/' : '/'
 }
