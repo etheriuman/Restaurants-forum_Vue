@@ -23,6 +23,7 @@
           class="btn btn-danger btn-border favorite mr-2"
           v-if="restaurant.isFavorited"
           @click.prevent.stop="deleteFavorite(restaurant.id)"
+          :disabled="isProcessing"
         >
           移除最愛
         </button>
@@ -31,6 +32,7 @@
           class="btn btn-primary btn-border favorite mr-2"
           v-else
           @click.prevent.stop="addFavorite(restaurant.id)"
+          :disabled="isProcessing"
         >
           加到最愛
         </button>
@@ -39,6 +41,7 @@
           class="btn btn-danger like mr-2"
           v-if="restaurant.isLiked"
           @click.prevent.stop="deleteLike(restaurant.id)"
+          :disabled="isProcessing"
         >
           Unlike
         </button>
@@ -47,6 +50,7 @@
           class="btn btn-primary like mr-2"
           v-else
           @click.prevent.stop="addLike(restaurant.id)"
+          :disabled="isProcessing"
         >
           Like
         </button>
@@ -69,15 +73,17 @@ export default {
   },
   data() {
     return {
-      restaurant: this.initialRestaurant
+      restaurant: this.initialRestaurant,
+      isProcessing: false
     }
   },
   mixins: [emptyImageFilter],
   methods: {
     async addFavorite(restaurantId) {
       try {
+        this.isProcessing = true
         const { data } = await usersAPI.addFavorite({restaurantId})
-
+        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.message)
         }
@@ -90,13 +96,15 @@ export default {
           icon: 'error',
           title: '無法將餐廳加入最愛，請稍後再試'
         })
+        this.isProcessing = false
         console.log(e)
       }
     },
     async deleteFavorite(restaurantId) {
       try {
+        this.isProcessing - true
         const { data } = await usersAPI.deleteFavorite({restaurantId})
-
+        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.message)
         }
@@ -109,12 +117,15 @@ export default {
           icon: 'error',
           title: '無法將餐廳移除最愛，請稍後再試'
         })
+        this.isProcessing = false
         console.log(e)
       }
     },
     async addLike(restaurantId) {
       try {
+        this.isProcessing = true
         const { data } = await usersAPI.addLike({restaurantId})
+        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.status)
         }
@@ -127,13 +138,16 @@ export default {
           icon: 'error',
           title: '無法加入喜愛餐廳，請稍後再試'
         })
+        this.isProcessing = false
         console.log(e)
       }
 
     },
     async deleteLike(restaurantId) {
       try {
+        this.isProcessing = true
         const { data } = await usersAPI.deleteLike({restaurantId})
+        this.isProcessing = false
         if (data.status !== 'success') {
           throw new Error(data.status)
         }
@@ -146,6 +160,7 @@ export default {
           icon: 'error',
           title: '無法移除喜愛餐廳，請稍後再試'
         })
+        this.isProcessing = false
         console.log(e)
       }
     }
